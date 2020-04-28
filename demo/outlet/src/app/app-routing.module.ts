@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { LocalizeRouterSettings } from '../../../../src/localize-router.config';
+import { LocalizeRouterModule } from '../../../../src/localize-router.module';
+import { LocalizeParser, ManualParserLoader } from '../../../../src/localize-router.parser';
 import { HomeComponent } from './home/home.component';
 import { MembersComponent } from './members/members.component';
-import { MembersListComponent } from './members/members-list/members-list.component';
-import { BioComponent } from './members/bio/bio.component';
-import { LocalizeRouterModule, LocalizeRouterSettings, LocalizeParser, ManualParserLoader } from 'localize-router';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 
@@ -15,10 +15,11 @@ export function ManualLoaderFactory(translate: TranslateService, location: Locat
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'home', component: HomeComponent },
-  { path: 'members', component: MembersComponent, children: [
-    { path: 'membersList', component: MembersListComponent, outlet: 'list' },
-    { path: ':id', component: BioComponent, outlet: 'bio' }
-  ] },
+    {
+        path: 'members',
+        component: MembersComponent,
+        loadChildren: './members/members.module#MembersModule'
+    }
 ];
 
 @NgModule({
