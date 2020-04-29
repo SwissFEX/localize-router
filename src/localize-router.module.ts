@@ -76,7 +76,11 @@ export class ParserUpdater {
     }
 
     generateUpdater(routes: Routes): () => Promise<any> {
-        this.routes = [...this.parser.routes, ...routes];
+        if (!this.parser.routes) {
+            this.parser.routes = routes;
+        } else {
+            this.routes = [...this.parser.routes, ...routes];
+        }
         return this.appUpdater;
     }
 }
