@@ -61,9 +61,9 @@ export class ParserInitializer {
 @Injectable()
 export class ParserUpdater {
     routes: Routes;
+    parser: LocalizeParser;
 
-    constructor(private injector: Injector,
-                private parser: LocalizeParser) {}
+    constructor(private injector: Injector) {}
 
     appUpdater(): Promise<any> {
         const res = this.parser.load(this.routes);
@@ -75,7 +75,8 @@ export class ParserUpdater {
         return res;
     }
 
-    generateUpdater(routes: Routes): () => Promise<any> {
+    generateUpdater(parser: LocalizeParser, routes: Routes): () => Promise<any> {
+        this.parser = parser;
         if (!this.parser.routes) {
             this.routes = routes;
         } else {
@@ -95,8 +96,8 @@ export function getAppInitializer(p: ParserInitializer, parser: LocalizeParser, 
     return p.generateInitializer(parser, routes).bind(p);
 }
 
-export function getAppUpdater(p: ParserUpdater, routes: Routes) {
-    return p.generateUpdater(routes).bind(p);
+export function getAppUpdater(p: ParserUpdater, parser: LocalizeParser, routes: Routes) {
+    return p.generateUpdater(parser, routes).bind(p);
 }
 
 @NgModule({
@@ -107,9 +108,10 @@ export function getAppUpdater(p: ParserUpdater, routes: Routes) {
 export class LocalizeRouterModule {
 
     constructor(@Optional() @Inject(RAW_CHILD_ROUTES) routes: Routes,
+                @Inject(LocalizeParser) parser: LocalizeParser,
                 @Inject(ParserUpdater) parserUpdater: ParserUpdater) {
         if (routes && routes.length) {
-            getAppUpdater(parserUpdater, routes);
+            getAppUpdater(parserUpdater, parser, routes);
         }
     }
 
@@ -152,11 +154,11 @@ export class LocalizeRouterModule {
         return {
             ngModule: LocalizeRouterModule,
             providers: [
-                ParserUpdater,
                 {
                     provide: RAW_CHILD_ROUTES,
                     multi: true,
-                    useValue: routes
+                    useValue: routes,
+                    deps: [ParserUpdater, LocalizeParser, RAW_CHILD_ROUTES]
                 }
             ]
         };
