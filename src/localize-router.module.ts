@@ -136,6 +136,7 @@ export class LocalizeRouterModule {
                 },
                 LocalizeRouterService,
                 ParserInitializer,
+                ParserUpdater,
                 { provide: NgModuleFactoryLoader, useClass: LocalizeRouterConfigLoader },
                 {
                     provide: APP_INITIALIZER,
