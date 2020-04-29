@@ -15,7 +15,7 @@ import {
     DEFAULT_LANG_FUNCTION,
     LOCALIZE_ROUTER_FORROOT_GUARD,
     LocalizeRouterConfig,
-    LocalizeRouterSettings,
+    LocalizeRouterSettings, RAW_CHILD_ROUTES,
     RAW_ROUTES,
     USE_CACHED_LANG
 } from './localize-router.config';
@@ -75,8 +75,8 @@ export class ParserUpdater {
         return res;
     }
 
-    generateUpdater(routes: Routes[]): () => Promise<any> {
-        this.routes = routes.reduce((a, b) => a.concat(b));
+    generateUpdater(routes: Routes): () => Promise<any> {
+        this.routes = [...this.parser.routes, ...routes];
         return this.appUpdater;
     }
 }
@@ -91,7 +91,7 @@ export function getAppInitializer(p: ParserInitializer, parser: LocalizeParser, 
     return p.generateInitializer(parser, routes).bind(p);
 }
 
-export function getAppUpdater(p: ParserUpdater, routes: Routes[]) {
+export function getAppUpdater(p: ParserUpdater, routes: Routes) {
     return p.generateUpdater(routes).bind(p);
 }
 
@@ -102,9 +102,11 @@ export function getAppUpdater(p: ParserUpdater, routes: Routes[]) {
 })
 export class LocalizeRouterModule {
 
-    constructor(@Inject(RAW_ROUTES) routes: Routes[],
+    constructor(@Inject(RAW_CHILD_ROUTES) routes: Routes,
                 @Inject(ParserUpdater) parserUpdater: ParserUpdater) {
-        getAppUpdater(parserUpdater, routes);
+        if (routes && routes.length) {
+            getAppUpdater(parserUpdater, routes);
+        }
     }
 
     static forRoot(routes: Routes, config: LocalizeRouterConfig = {}): ModuleWithProviders {
@@ -147,7 +149,7 @@ export class LocalizeRouterModule {
             providers: [
                 ParserUpdater,
                 {
-                    provide: RAW_ROUTES,
+                    provide: RAW_CHILD_ROUTES,
                     multi: true,
                     useValue: routes
                 }

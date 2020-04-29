@@ -13,6 +13,7 @@ export const LOCALIZE_ROUTER_FORROOT_GUARD = new InjectionToken<LocalizeRouterMo
  * @type {InjectionToken<Routes[]>}
  */
 export const RAW_ROUTES: InjectionToken<Routes[]> = new InjectionToken<Routes[]>('RAW_ROUTES');
+export const RAW_CHILD_ROUTES: InjectionToken<Routes> = new InjectionToken<Routes>('RAW_CHILD_ROUTES');
 
 /**
  * Type for Caching of default language
