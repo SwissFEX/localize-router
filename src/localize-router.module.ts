@@ -77,7 +77,7 @@ export class ParserUpdater {
 
     generateUpdater(routes: Routes): () => Promise<any> {
         if (!this.parser.routes) {
-            this.parser.routes = routes;
+            this.routes = routes;
         } else {
             this.routes = [...this.parser.routes, ...routes];
         }
@@ -106,7 +106,7 @@ export function getAppUpdater(p: ParserUpdater, routes: Routes) {
 })
 export class LocalizeRouterModule {
 
-    constructor(@Inject(RAW_CHILD_ROUTES) routes: Routes,
+    constructor(@Optional() @Inject(RAW_CHILD_ROUTES) routes: Routes,
                 @Inject(ParserUpdater) parserUpdater: ParserUpdater) {
         if (routes && routes.length) {
             getAppUpdater(parserUpdater, routes);
