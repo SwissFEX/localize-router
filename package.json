@@ -53,6 +53,7 @@
         "@angular/router": "~6.0.6",
         "@ngx-translate/core": "10.0.2",
         "@types/es6-promise": "0.0.32",
+        "@types/flat": "^5.0.0",
         "@types/hammerjs": "2.0.34",
         "@types/jasmine": "2.5.47",
         "@types/node": "7.0.22",
@@ -60,6 +61,7 @@
         "codelyzer": "~4.5.0",
         "concurrently": "3.1.0",
         "core-js": "2.4.1",
+        "flat": "^5.0.0",
         "istanbul-instrumenter-loader": "~2.0.0",
         "jasmine-core": "2.6.2",
         "karma": "1.7.0",
@@ -83,5 +85,6 @@
         "webpack-node-externals": "^1.5.4",
         "yarn": "^1.12.1",
         "zone.js": "~0.8.26"
-    }
+    },
+    "dependencies": {}
 }

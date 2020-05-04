@@ -15,11 +15,12 @@ import {
     DEFAULT_LANG_FUNCTION,
     LOCALIZE_ROUTER_FORROOT_GUARD,
     LocalizeRouterConfig,
-    LocalizeRouterSettings, RAW_CHILD_ROUTES,
+    LocalizeRouterSettings, PATH_TO_CHILD_ROUTE, RAW_CHILD_ROUTES,
     RAW_ROUTES,
     USE_CACHED_LANG
 } from './localize-router.config';
 import { LocalizeRouterConfigLoader } from './localize-router-config-loader';
+import { flatten, unflatten } from 'flat';
 
 @Injectable()
 export class ParserInitializer {
@@ -75,12 +76,19 @@ export class ParserUpdater {
         return res;
     }
 
-    generateUpdater(parser: LocalizeParser, routes: Routes): () => Promise<any> {
+    generateUpdater(parser: LocalizeParser, routes: Routes[], path: string): () => Promise<any> {
         this.parser = parser;
         if (!this.parser.routes) {
-            this.routes = routes;
+            this.routes = routes.reduce((a, b) => a.concat(b));
         } else {
-            this.routes = [...this.parser.routes, ...routes];
+            const parentPath = path.split('.').slice(0, -1).toString();
+            this.parser.routes.map(currentRoutes => {
+                const flattenedRoutes = flatten(currentRoutes as Array<any>) as any;
+                if (Object.keys(flattenedRoutes).indexOf(parentPath) > -1) {
+                    flattenedRoutes[`${parentPath}.children`] = routes;
+                }
+                currentRoutes = unflatten(flattenedRoutes);
+            });
         }
         return this.appUpdater;
     }
@@ -96,8 +104,8 @@ export function getAppInitializer(p: ParserInitializer, parser: LocalizeParser, 
     return p.generateInitializer(parser, routes).bind(p);
 }
 
-export function getAppUpdater(p: ParserUpdater, parser: LocalizeParser, routes: Routes) {
-    return p.generateUpdater(parser, routes).bind(p);
+export function getAppUpdater(p: ParserUpdater, parser: LocalizeParser, routes: Routes[], path: string) {
+    return p.generateUpdater(parser, routes, path).bind(p);
 }
 
 @NgModule({
@@ -107,11 +115,12 @@ export function getAppUpdater(p: ParserUpdater, parser: LocalizeParser, routes: 
 })
 export class LocalizeRouterModule {
 
-    constructor(@Optional() @Inject(RAW_CHILD_ROUTES) routes: Routes,
+    constructor(@Optional() @Inject(RAW_CHILD_ROUTES) routes: Routes[],
+                @Optional() @Inject(PATH_TO_CHILD_ROUTE) path: string,
                 @Inject(LocalizeParser) parser: LocalizeParser,
                 @Inject(ParserUpdater) parserUpdater: ParserUpdater) {
-        if (routes && routes.length) {
-            getAppUpdater(parserUpdater, parser, routes);
+        if (routes && routes.length && path) {
+            getAppUpdater(parserUpdater, parser, routes, path);
         }
     }
 
@@ -150,7 +159,7 @@ export class LocalizeRouterModule {
         };
     }
 
-    static forChild(routes: Routes): ModuleWithProviders {
+    static forChild(routes: Routes, path: string): ModuleWithProviders {
         return {
             ngModule: LocalizeRouterModule,
             providers: [
@@ -159,6 +168,11 @@ export class LocalizeRouterModule {
                     multi: true,
                     useValue: routes,
                     deps: [ParserUpdater, LocalizeParser, RAW_CHILD_ROUTES]
+                },
+                {
+                    provide: PATH_TO_CHILD_ROUTE,
+                    multi: true,
+                    useValue: path
                 }
             ]
         };

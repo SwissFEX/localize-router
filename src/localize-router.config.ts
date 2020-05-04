@@ -14,6 +14,7 @@ export const LOCALIZE_ROUTER_FORROOT_GUARD = new InjectionToken<LocalizeRouterMo
  */
 export const RAW_ROUTES: InjectionToken<Routes[]> = new InjectionToken<Routes[]>('RAW_ROUTES');
 export const RAW_CHILD_ROUTES: InjectionToken<Routes> = new InjectionToken<Routes>('RAW_CHILD_ROUTES');
+export const PATH_TO_CHILD_ROUTE: InjectionToken<string> = new InjectionToken<string>('PATH_TO_CHILD_ROUTE');
 
 /**
  * Type for Caching of default language
